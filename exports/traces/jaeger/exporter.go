@@ -17,6 +17,9 @@ package jaeger
 
 import (
 	"bytes"
+	"encoding/base64"
+	"fmt"
+	"github.com/fuyibing/log/conf"
 	"github.com/fuyibing/log/globals"
 	"github.com/valyala/fasthttp"
 
@@ -29,20 +32,13 @@ type (
 	Exporter struct {
 		spans     []globals.SpanReadonly
 		formatter Formatter
-
-		endpoint    string
-		contentType string
 	}
 )
 
 // NewExporter
 // is a exporter manager.
 func NewExporter() *Exporter {
-	return (&Exporter{
-		// TODO replace follow with configuration
-		contentType: "application/vnd.apache.thrift.binary",
-		endpoint:    "http://localhost:14268/api/traces",
-	}).init()
+	return (&Exporter{}).init()
 }
 
 // Push
@@ -92,9 +88,16 @@ func (o *Exporter) upload(buf *bytes.Buffer) (err error) {
 
 	req = fasthttp.AcquireRequest()
 	req.Header.SetMethod(http.MethodPost)
-	req.Header.SetContentType(o.contentType)
-	req.SetRequestURI(o.endpoint)
+	req.Header.SetContentType("application/vnd.apache.thrift.binary")
+	req.SetRequestURI(conf.Config.GetJaeger().GetEndpoint())
 	req.SetBodyStream(buf, buf.Len())
+
+	// Basic authorization.
+	if user, pass := conf.Config.GetJaeger().GetUsername(), conf.Config.GetJaeger().GetPassword(); user != "" {
+		req.Header.Set("Authorization",
+			fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(user+":"+pass))),
+		)
+	}
 
 	err = fasthttp.Do(req, res)
 	return

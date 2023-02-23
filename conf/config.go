@@ -15,6 +15,12 @@
 
 package conf
 
+import (
+	"gopkg.in/yaml.v3"
+	"os"
+	"strings"
+)
+
 var (
 	Config Configuration
 )
@@ -27,28 +33,53 @@ type (
 		ErrorOn() bool
 		FatalOn() bool
 
+		GetPid() int
+
 		GetExporter() ExporterConfiguration
+		GetJaeger() JaegerReportConfiguration
 	}
 
 	ExporterConfiguration interface {
 		GetServiceName() string
+		GetServiceVersion() string
 
 		GetLogAdapter() string
 		GetTraceAdapter() string
 	}
 
-	configuration struct {
-		Level    Level                  `yaml:"level"`
-		Exporter *exporterConfiguration `yaml:"exporter"`
+	JaegerReportConfiguration interface {
+		GetEndpoint() string
+		GetUsername() string
+		GetPassword() string
+	}
 
-		debugOn, infoOn, warnOn, errorOn, fatalOn bool
+	configuration struct {
+		Level    Level                        `yaml:"level"`
+		Exporter *exporterConfiguration       `yaml:"exporter"`
+		Jaeger   *jaegerReporterConfiguration `yaml:"jaeger"`
+
+		processId int
+
+		debugOn,
+		infoOn,
+		warnOn,
+		errorOn,
+		fatalOn bool
 	}
 
 	exporterConfiguration struct {
-		ServiceName string `yaml:"service-name"` // example: service name
+		ServiceName    string `yaml:"service-name"`    // example: service name
+		ServiceVersion string `yaml:"service-version"` // example: 1.0
 
 		LogAdapter   string `yaml:"log-adapter"`   // example: term
 		TraceAdapter string `yaml:"trace-adapter"` // example: jaeger
+
+	}
+
+	jaegerReporterConfiguration struct {
+		Endpoint string `yaml:"endpoint"`
+		Username string `yaml:"username"`
+		Password string `yaml:"password"`
 	}
 )
 
@@ -66,16 +97,26 @@ func (o *configuration) FatalOn() bool { return o.fatalOn }
 // Configuration: child
 // /////////////////////////////////////////////////////////////////////////////
 
-func (o *configuration) GetExporter() ExporterConfiguration { return o.Exporter }
+func (o *configuration) GetPid() int                          { return o.processId }
+func (o *configuration) GetExporter() ExporterConfiguration   { return o.Exporter }
+func (o *configuration) GetJaeger() JaegerReportConfiguration { return o.Jaeger }
 
 // /////////////////////////////////////////////////////////////////////////////
 // Reporter Configuration
 // /////////////////////////////////////////////////////////////////////////////
 
-func (o *exporterConfiguration) GetServiceName() string { return o.ServiceName }
+func (o *exporterConfiguration) GetServiceName() string    { return o.ServiceName }
+func (o *exporterConfiguration) GetServiceVersion() string { return o.ServiceVersion }
+func (o *exporterConfiguration) GetLogAdapter() string     { return o.LogAdapter }
+func (o *exporterConfiguration) GetTraceAdapter() string   { return o.TraceAdapter }
 
-func (o *exporterConfiguration) GetLogAdapter() string   { return o.LogAdapter }
-func (o *exporterConfiguration) GetTraceAdapter() string { return o.TraceAdapter }
+// /////////////////////////////////////////////////////////////////////////////
+// Jaeger reporter Configuration
+// /////////////////////////////////////////////////////////////////////////////
+
+func (o *jaegerReporterConfiguration) GetEndpoint() string { return o.Endpoint }
+func (o *jaegerReporterConfiguration) GetUsername() string { return o.Username }
+func (o *jaegerReporterConfiguration) GetPassword() string { return o.Password }
 
 // /////////////////////////////////////////////////////////////////////////////
 // Access: defaults
@@ -88,11 +129,17 @@ func (o *configuration) defaults() {
 		o.Exporter = &exporterConfiguration{}
 	}
 	o.Exporter.defaults()
+
+	if o.Jaeger == nil {
+		o.Jaeger = &jaegerReporterConfiguration{}
+	}
+	o.Jaeger.defaults()
 }
 
 func (o *exporterConfiguration) defaults() {
-	// TODO force definitions.
-	o.ServiceName = "log-trace"
+}
+
+func (o *jaegerReporterConfiguration) defaults() {
 }
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -100,18 +147,32 @@ func (o *exporterConfiguration) defaults() {
 // /////////////////////////////////////////////////////////////////////////////
 
 func (o *configuration) init() *configuration {
+	o.processId = os.Getpid()
 	o.scan()
 	o.defaults()
 	return o
 }
 
 func (o *configuration) scan() {
+	for _, s := range []string{"config/log.yaml", "../config/log.yaml"} {
+		if buf, err := os.ReadFile(s); err == nil {
+			if yaml.Unmarshal(buf, o) == nil {
+				break
+			}
+		}
+	}
 }
 
 func (o *configuration) state() {
-	o.debugOn = true
-	o.infoOn = true
-	o.warnOn = true
-	o.errorOn = true
-	o.fatalOn = true
+	var (
+		l  = Level(strings.ToUpper(o.Level.String()))
+		n  = l.Int()
+		ni = n > 0
+	)
+
+	o.debugOn = ni && n >= Debug.Int()
+	o.infoOn = ni && n >= Info.Int()
+	o.warnOn = ni && n >= Warn.Int()
+	o.errorOn = ni && n >= Error.Int()
+	o.fatalOn = ni && n >= Fatal.Int()
 }

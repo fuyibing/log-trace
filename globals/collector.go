@@ -95,7 +95,9 @@ func (o *collector) PushSpan(span Span) {
 	}
 
 	// Push immediately.
-	o.SpanExporter.Push(span)
+	if err := o.SpanExporter.Push(span); err != nil {
+		println("push error: ", err.Error(), conf.Config.GetJaeger().GetEndpoint())
+	}
 }
 
 func (o *collector) PushSpanLog(span Span, level conf.Level, text string, args ...interface{}) {

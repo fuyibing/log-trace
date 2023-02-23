@@ -15,34 +15,20 @@
 
 package conf
 
-type (
-	// Level
-	// defined for log record level.
-	Level string
+import (
+	"encoding/json"
+	"testing"
 )
 
-const (
-	Debug Level = "DEBUG"
-	Info  Level = "INFO"
-	Warn  Level = "WARN"
-	Error Level = "ERROR"
-	Fatal Level = "FATAL"
-)
+func TestConfiguration_Level(t *testing.T) {
 
-var (
-	LevelInt = map[Level]int{
-		Fatal: 1,
-		Error: 2,
-		Warn:  3,
-		Info:  4,
-		Debug: 5,
-	}
-)
+	t.Logf("debug: %v", Config.DebugOn())
+	t.Logf("info: %v", Config.InfoOn())
+	t.Logf("warn: %v", Config.WarnOn())
+	t.Logf("error: %v", Config.ErrorOn())
+	t.Logf("fatal: %v", Config.FatalOn())
 
-func (l Level) Int() (n int) {
-	return LevelInt[l]
-}
+	buf, _ := json.Marshal(Config)
+	t.Logf("json: %s", buf)
 
-func (l Level) String() string {
-	return string(l)
 }

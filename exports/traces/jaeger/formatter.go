@@ -23,7 +23,6 @@ import (
 	"github.com/fuyibing/log/conf"
 	"github.com/fuyibing/log/exports/traces/jaeger/thrift"
 	"github.com/fuyibing/log/globals"
-	"os"
 	"strconv"
 )
 
@@ -51,8 +50,8 @@ func (o *formatter) Generate(gs []globals.SpanReadonly) (res *bytes.Buffer, err 
 	// Process/Resource fields.
 	if tags := o.makeTags(map[string]interface{}{
 		"service.name":    conf.Config.GetExporter().GetServiceName(),
-		"service.version": conf.Config.GetExporter().GetServiceName(),
-		"process.id":      os.Getpid(),
+		"service.version": conf.Config.GetExporter().GetServiceVersion(),
+		"process.id":      conf.Config.GetPid(),
 	}); len(tags) > 0 {
 		batch.Process.Tags = tags
 	}

@@ -1,0 +1,37 @@
+#
+# Full configuration for log-trace
+#
+
+# Log level.
+#   DEBUG
+#   INFO
+#   WARN
+#   ERROR
+#   FATAL
+level: "warn"
+
+# Define where log and trace are stored.
+exporter:
+  service-name: "log-trace"
+  service-version: "1.0"
+
+  # Define log store type
+  #   term - print log message on terminal
+  #   file - write log into files
+  #   kafka - publish log to kafka
+  log-adapter: "term"
+  # Trace collector type
+  #   jaeger - use jaeger
+  trace-adapter: "jaeger"
+
+# Jaeger options,
+# When the trace-adapter is configured as jaeger, the following
+# settings take effect
+jaeger:
+  # Endpoint address
+  #   http://localhost:14268/api/traces
+  endpoint: "http://localhost:14268/api/traces"
+  # Username
+  username: ""
+  # Password
+  password: ""
