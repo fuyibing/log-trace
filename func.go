@@ -11,30 +11,45 @@
 // limitations under the License.
 //
 // author: wsfuyibing <websearch@163.com>
-// date: 2023-02-23
+// date: 2023-02-24
 
 package log
 
 import (
-	"github.com/fuyibing/log/globals"
+	"github.com/fuyibing/log/config"
 )
 
+// Debug send debug level log to Provider.
 func Debug(text string, args ...interface{}) {
-	globals.Logger.Debug(text, args...)
+	if config.Config.DebugOn() {
+		Provider.PushBaseLog(config.Debug, text, args...)
+	}
 }
 
+// Info send info level log to Provider.
 func Info(text string, args ...interface{}) {
-	globals.Logger.Info(text, args...)
+	if config.Config.InfoOn() {
+		Provider.PushBaseLog(config.Info, text, args...)
+	}
 }
 
+// Warn send warn level log to Provider.
 func Warn(text string, args ...interface{}) {
-	globals.Logger.Warn(text, args...)
+	if config.Config.WarnOn() {
+		Provider.PushBaseLog(config.Warn, text, args...)
+	}
 }
 
+// Error send error level log to Provider.
 func Error(text string, args ...interface{}) {
-	globals.Logger.Error(text, args...)
+	if config.Config.ErrorOn() {
+		Provider.PushBaseLog(config.Error, text, args...)
+	}
 }
 
+// Fatal send fatal level log to Provider.
 func Fatal(text string, args ...interface{}) {
-	globals.Logger.Fatal(text, args...)
+	if config.Config.FatalOn() {
+		Provider.PushBaseLog(config.Fatal, text, args...)
+	}
 }

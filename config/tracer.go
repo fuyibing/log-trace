@@ -13,19 +13,15 @@
 // author: wsfuyibing <websearch@163.com>
 // date: 2023-02-24
 
-package log
+package config
 
-import (
-	"github.com/fuyibing/log/tracer"
-	"sync"
+type (
+	// TracerName
+	// name of trace exporter.
+	TracerName string
 )
 
-var (
-	Provider tracer.ProviderManager
+const (
+	TracerJaeger TracerName = "jaeger"
+	TracerTerm   TracerName = "term"
 )
-
-func init() {
-	new(sync.Once).Do(func() {
-		Provider = tracer.Provider
-	})
-}

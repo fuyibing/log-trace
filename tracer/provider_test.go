@@ -13,19 +13,20 @@
 // author: wsfuyibing <websearch@163.com>
 // date: 2023-02-24
 
-package log
+package tracer
 
 import (
-	"github.com/fuyibing/log/tracer"
-	"sync"
+	"testing"
 )
 
-var (
-	Provider tracer.ProviderManager
-)
+func TestProvider_NewTrace(t *testing.T) {
+	t.Logf("provider attr: %v", Provider.GetAttr().JSON())
 
-func init() {
-	new(sync.Once).Do(func() {
-		Provider = tracer.Provider
-	})
+	tr := Provider.NewTrace("example")
+	t.Logf("Trace: %s - [%s][err=%v][sec=%v]", tr.GetName(), tr.GetTraceId().String(), tr.GetTraceId().Err(), tr.GetTraceId().Security())
+	t.Logf("Span: [%s][err=%v][sec=%v]", tr.GetSpanId().String(), tr.GetSpanId().Err(), tr.GetSpanId().Security())
+
+	s1 := tr.NewSpan("span 1")
+	s1.SetAttr("key", "value")
+	t.Logf("attr: %v", s1.GetAttr().JSON())
 }

@@ -13,19 +13,40 @@
 // author: wsfuyibing <websearch@163.com>
 // date: 2023-02-24
 
-package log
+package tracer
 
 import (
-	"github.com/fuyibing/log/tracer"
-	"sync"
+	"github.com/fuyibing/log/config"
+	"time"
 )
 
-var (
-	Provider tracer.ProviderManager
+type (
+	// Log
+	// an custom message.
+	Log struct {
+		Level config.LoggerLevel
+		Time  time.Time
+		Text  string
+		Type  LogType
+	}
+
+	LoggerManager interface {
+		Push(log *Log)
+	}
+
+	LogType int
 )
 
-func init() {
-	new(sync.Once).Do(func() {
-		Provider = tracer.Provider
-	})
+const (
+	_ LogType = iota
+	LogInternal
+	LogSpan
+)
+
+func NewLog(t LogType, l config.LoggerLevel) *Log {
+	return &Log{
+		Level: l,
+		Time:  time.Now(),
+		Type:  t,
+	}
 }

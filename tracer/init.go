@@ -13,19 +13,19 @@
 // author: wsfuyibing <websearch@163.com>
 // date: 2023-02-24
 
-package log
+package tracer
 
 import (
-	"github.com/fuyibing/log/tracer"
 	"sync"
 )
 
-var (
-	Provider tracer.ProviderManager
+const (
+	ContextValueKey = "__LogTraceBound__"
 )
 
 func init() {
 	new(sync.Once).Do(func() {
-		Provider = tracer.Provider
+		Identify = (&identify{}).init()
+		Provider = (&provider{}).init()
 	})
 }

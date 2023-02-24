@@ -13,19 +13,36 @@
 // author: wsfuyibing <websearch@163.com>
 // date: 2023-02-24
 
-package log
+package tracer
 
 import (
-	"github.com/fuyibing/log/tracer"
-	"sync"
+	"encoding/json"
 )
 
-var (
-	Provider tracer.ProviderManager
+type (
+	// Attr
+	// attributes definitions for provider and span.
+	Attr map[string]interface{}
 )
 
-func init() {
-	new(sync.Once).Do(func() {
-		Provider = tracer.Provider
-	})
+// Add
+// key/value pair into current.
+func (o Attr) Add(key string, value interface{}) Attr {
+	o[key] = value
+	return o
+}
+
+// Copy
+// copy attributes from params into current.
+func (o Attr) Copy(a Attr) {
+	for k, v := range a {
+		o[k] = v
+	}
+}
+
+// JSON
+// returns a json string.
+func (o Attr) JSON() string {
+	buf, _ := json.Marshal(o)
+	return string(buf)
 }

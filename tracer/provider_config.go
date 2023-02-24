@@ -13,19 +13,4 @@
 // author: wsfuyibing <websearch@163.com>
 // date: 2023-02-24
 
-package log
-
-import (
-	"github.com/fuyibing/log/tracer"
-	"sync"
-)
-
-var (
-	Provider tracer.ProviderManager
-)
-
-func init() {
-	new(sync.Once).Do(func() {
-		Provider = tracer.Provider
-	})
-}
+package tracer

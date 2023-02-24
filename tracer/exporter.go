@@ -13,19 +13,22 @@
 // author: wsfuyibing <websearch@163.com>
 // date: 2023-02-24
 
-package log
+package tracer
 
 import (
-	"github.com/fuyibing/log/tracer"
-	"sync"
+	"context"
 )
 
-var (
-	Provider tracer.ProviderManager
-)
+type (
+	LoggerExporter interface {
+		Push(log *Log) error
+		Start(ctx context.Context) error
+		Stopped() bool
+	}
 
-func init() {
-	new(sync.Once).Do(func() {
-		Provider = tracer.Provider
-	})
-}
+	TracerExporter interface {
+		Push(span Span) error
+		Start(ctx context.Context) error
+		Stopped() bool
+	}
+)

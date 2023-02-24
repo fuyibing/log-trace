@@ -13,19 +13,20 @@
 // author: wsfuyibing <websearch@163.com>
 // date: 2023-02-24
 
-package log
+package config
 
 import (
-	"github.com/fuyibing/log/tracer"
 	"sync"
 )
 
-var (
-	Provider tracer.ProviderManager
+const (
+	DefaultOpenTracingSample  = "X-B3-Sample"
+	DefaultOpenTracingSpanId  = "X-B3-Spanid"
+	DefaultOpenTracingTraceId = "X-B3-Traceid"
 )
 
 func init() {
 	new(sync.Once).Do(func() {
-		Provider = tracer.Provider
+		Config = (&configuration{}).init()
 	})
 }

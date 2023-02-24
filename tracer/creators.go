@@ -13,19 +13,25 @@
 // author: wsfuyibing <websearch@163.com>
 // date: 2023-02-24
 
-package log
+package tracer
 
 import (
-	"github.com/fuyibing/log/tracer"
-	"sync"
+	"context"
 )
 
-var (
-	Provider tracer.ProviderManager
-)
+// traceCreator a creator create root trace.
+func traceCreator(ctx context.Context, provider *provider, name string) *trace {
+	tr := &trace{
+		attr:     Attr{},
+		name:     name,
+		provider: provider,
+	}
 
-func init() {
-	new(sync.Once).Do(func() {
-		Provider = tracer.Provider
-	})
+	if ctx == nil {
+		tr.ctx = context.WithValue(context.Background(), ContextValueKey, tr)
+	} else {
+		tr.ctx = context.WithValue(ctx, ContextValueKey, tr)
+	}
+
+	return tr
 }

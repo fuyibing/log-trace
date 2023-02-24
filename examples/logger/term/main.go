@@ -13,19 +13,38 @@
 // author: wsfuyibing <websearch@163.com>
 // date: 2023-02-24
 
-package log
+package main
 
 import (
-	"github.com/fuyibing/log/tracer"
-	"sync"
-)
-
-var (
-	Provider tracer.ProviderManager
+	"github.com/fuyibing/log"
+	"github.com/fuyibing/log/exporters/logger_term"
 )
 
 func init() {
-	new(sync.Once).Do(func() {
-		Provider = tracer.Provider
-	})
+	initLogger()
+	initTrace()
+}
+
+func initLogger() {
+	v := logger_term.New()
+	log.Provider.SetLoggerExporter(v)
+}
+
+func initTrace() {}
+
+func main() {
+	mainBase()
+	mainTrace()
+}
+
+func mainBase() {
+	log.Debug("base debug")
+	log.Info("base info")
+	log.Warn("base warn")
+	log.Error("base error")
+	log.Fatal("base fatal")
+}
+
+func mainTrace() {
+
 }

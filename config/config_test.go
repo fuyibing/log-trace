@@ -13,19 +13,21 @@
 // author: wsfuyibing <websearch@163.com>
 // date: 2023-02-24
 
-package log
+package config
 
 import (
-	"github.com/fuyibing/log/tracer"
-	"sync"
+	"gopkg.in/yaml.v3"
+	"testing"
 )
 
-var (
-	Provider tracer.ProviderManager
-)
+func TestConfiguration_With(t *testing.T) {
+	Config.With(
+		ServiceName("my app"),
+		ServicePort(3721),
+		ServiceVersion("2.3.4"),
+	)
 
-func init() {
-	new(sync.Once).Do(func() {
-		Provider = tracer.Provider
-	})
+	buf, _ := yaml.Marshal(Config)
+	// buf, _ := json.Marshal(Config)
+	t.Logf("config: %s", buf)
 }

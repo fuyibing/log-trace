@@ -1,37 +1,35 @@
 #
-# Full configuration for log-trace
+# config log trace
 #
 
-# Log level.
-#   DEBUG
-#   INFO
-#   WARN
-#   ERROR
-#   FATAL
-level: "warn"
+# OpenTracing definitions.
+# Implements: http request
+open-tracing-sample: "X-B3-Sample"
+open-tracing-span-id: "X-B3-Spanid"
+open-tracing-trace-id: "X-B3-Traceid"
 
-# Define where log and trace are stored.
-exporter:
-  service-name: "log-trace"
-  service-version: "1.0"
+# ServiceInfo definitions.
+service-name: "log-trace"
+service-port: 8080
+service-version: "1.0"
 
-  # Define log store type
-  #   term - print log message on terminal
-  #   file - write log into files
-  #   kafka - publish log to kafka
-  log-adapter: "term"
-  # Trace collector type
-  #   jaeger - use jaeger
-  trace-adapter: "jaeger"
+# log level.
+# accepts: off, debug, info, warn, error, fatal
+logger-level: debug
 
-# Jaeger options,
-# When the trace-adapter is configured as jaeger, the following
-# settings take effect
-jaeger:
-  # Endpoint address
-  #   http://localhost:14268/api/traces
+# Logger definitions.
+logger-name: term
+
+# Trace exporter definitions.
+# Accepts: jaeger, zipkin
+tracer-name: "jaeger"
+
+# whether to join the log when reporting Trace.
+tracer-with-log: true
+
+# Jaeger exporter configurations.
+# Follow configurations enabled if tracer-name value is jaeger.
+jaeger-trace:
   endpoint: "http://localhost:14268/api/traces"
-  # Username
   username: ""
-  # Password
   password: ""
